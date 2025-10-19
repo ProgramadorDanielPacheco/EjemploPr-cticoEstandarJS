@@ -27,3 +27,24 @@ export function getPersistedCount() {
 export function setPersistedCount(n) {
     localStorage.setItem(LS_KEYS.count, String(n));
 }
+
+export async function loadAndRenderProducts({ url, listEl, filterEl }) {
+    const resp = await fetch(url);
+    const items = await resp.json();
+
+    const render = (rows) => {
+        listEl.innerHTML = rows.map(p => (
+            `<li tabindex="0" aria-label="${p.name}, $${p.price}">
+         <strong>${p.name}</strong><br><small>$ ${p.price}</small>
+       </li>`
+        )).join('');
+    };
+
+    render(items);
+
+    filterEl.addEventListener('input', () => {
+        const q = filterEl.value.toLowerCase();
+        const filtered = items.filter(p => p.name.toLowerCase().includes(q));
+        render(filtered);
+    });
+}
