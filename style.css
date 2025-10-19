@@ -1,0 +1,12 @@
+:root { --bg:#ffffff; --fg:#1b1b1b; --card:#f3f3f3; }
+[data-theme="dark"] { --bg:#121212; --fg:#eaeaea; --card:#1f1f1f; }
+
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+header, footer { padding:16px; border-bottom:1px solid #ccc; }
+main { padding:16px; display:grid; gap:16px; grid-template-columns: 1fr; max-width:900px; margin:auto; }
+.card { background:var(--card); padding:16px; border-radius:12px; }
+button { padding:8px 12px; cursor:pointer; }
+.list { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:12px; list-style:none; padding:0; margin:0; }
+.list li { background:var(--card); border-radius:10px; padding:12px; }
+.sr-only { position:absolute; left:-9999px; }
