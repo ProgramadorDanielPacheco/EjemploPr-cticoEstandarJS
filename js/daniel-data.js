@@ -12,3 +12,18 @@ export function initTheme(toggleBtn) {
         applyTheme(next, toggleBtn);
     });
 }
+
+function applyTheme(theme, toggleBtn) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(LS_KEYS.theme, theme);
+    const pressed = theme === 'dark';
+    toggleBtn.setAttribute('aria-pressed', String(pressed));
+    toggleBtn.textContent = pressed ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+}
+
+export function getPersistedCount() {
+    return Number(localStorage.getItem(LS_KEYS.count) ?? 0);
+}
+export function setPersistedCount(n) {
+    localStorage.setItem(LS_KEYS.count, String(n));
+}
