@@ -3,53 +3,60 @@ import { setupCounter, setupForm } from './gabriel-interactions.js';
 
 const $ = (sel) => document.querySelector(sel);
 
-// Pequeña capa de persistencia opcional (si Daniel exporta sus funciones)
-const persist = {
-    get: () => 0,
-    set: (_n) => {}
-};
-
 (async () => {
-    // 1) Intentamos cargar el módulo de Daniel SIN romper nada si falla
+    // 1️⃣ — Intentamos cargar el módulo de Daniel
     try {
-        const d = await import('./daniel-data.js');
+        const daniel = await import('./daniel-data-theme.js');
 
-        // Tema (si está exportado)
-        d.initTheme?.($('#btn-theme'));
-
-        // Persistencia del contador (si está exportado)
-        if (d.getPersistedCount && d.setPersistedCount) {
-            persist.get = () => Number(d.getPersistedCount());
-            persist.set = (n) => d.setPersistedCount(n);
+        // ✅ Inicializar tema
+        if (daniel.initTheme) {
+            const btnTheme = $('#btn-theme');
+            daniel.initTheme(btnTheme);
         }
 
-        // Datos + filtro (si está exportado)
-        d.loadAndRenderProducts?.({
-            url: './data/products.json',
-            listEl: $('#listado'),
-            filterEl: $('#q')
+        // ✅ Inicializar persistencia (contador guardado en localStorage)
+        const persist = {
+            get: daniel.getPersistedCount
+                ? () => Number(daniel.getPersistedCount())
+                : () => 0,
+            set: daniel.setPersistedCount
+                ? (n) => daniel.setPersistedCount(n)
+                : () => {}
+        };
+
+        // ✅ Inicializar productos (listado y filtro)
+        if (daniel.loadAndRenderProducts) {
+            daniel.loadAndRenderProducts({
+                url: './data/products.json',
+                listEl: $('#listado'),
+                filterEl: $('#q')
+            });
+        }
+
+        // 2️⃣ — Tu parte (Gabriel)
+        const countEl  = $('#count');
+        const liveEl   = $('#live');
+        const incBtn   = $('#btn-inc');
+        const resetBtn = $('#btn-reset');
+
+        let count = persist.get(); // Trae el valor persistido si existe
+        countEl.textContent = String(count);
+
+        setupCounter({
+            incBtn,
+            resetBtn,
+            countEl,
+            liveEl,
+            getCount: () => count,
+            setCount: (n) => { count = n; persist.set(n); }
         });
-    } catch (e) {
-        console.warn('Módulo de Daniel no cargó o tiene exportaciones distintas:', e);
+
+        setupForm({
+            form: $('#demo-form'),
+            msgEl: $('#form-msg')
+        });
+
+    } catch (err) {
+        console.error('❌ Error cargando módulo de Daniel:', err);
     }
-
-    // 2) Tu parte (Gabriel): SIEMPRE se inicializa
-    const countEl = $('#count');
-    const liveEl  = $('#live');
-    const incBtn  = $('#btn-inc');
-    const resetBtn = $('#btn-reset');
-
-    let count = persist.get();                // si no hay persistencia, empieza en 0
-    countEl.textContent = String(count);
-
-    setupCounter({
-        incBtn,
-        resetBtn,
-        countEl,
-        liveEl,
-        getCount: () => count,
-        setCount: (n) => { count = n; persist.set(n); }
-    });
-
-    setupForm({ form: $('#demo-form'), msgEl: $('#form-msg') });
 })();
